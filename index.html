@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salva la clase · Profe Cata</title>
+<meta name="description" content="Ayuda a la profe Cata a esquivar el papeleo. Un juego de cumpleaños.">
+<meta name="theme-color" content="#1E3A32">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Salva la clase">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{--board:#1E3A32;--board2:#16302A;--chalk:#F4F1E4;--pink:#FF4FA3;--gold:#FFC94A;--ink:#1A0F1E;--panel:rgba(22,48,42,.92);--text:#F4F1E4;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--panel:rgba(12,26,22,.94);--text:#F4F1E4;color-scheme:dark}}
+:root[data-theme="dark"]{--panel:rgba(12,26,22,.94);--text:#F4F1E4;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overscroll-behavior:none;background:var(--board2);color:var(--text);overflow:hidden;font-family:"Patrick Hand","Comic Sans MS",cursive,sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#wrap{position:relative;width:100%;height:100%}
+canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;top:10px;right:10px;display:flex;gap:8px;z-index:3}
+.icon{width:46px;height:46px;border-radius:14px;border:3px solid var(--ink);background:var(--gold);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 4px 0 var(--ink)}
+.icon:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.icon:focus-visible,.btn:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
+.ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:4;padding:20px;background:color-mix(in srgb,var(--board2) 55%,transparent)}
+.ov{overflow-y:auto;align-items:safe center;padding:max(14px,env(safe-area-inset-top,0px)) 14px max(14px,env(safe-area-inset-bottom,0px))}
+.ov[hidden]{display:none}
+.card,.letter{margin:auto;max-height:none}
+@media (max-height:620px){.card{padding:14px 16px}.card img,.letter img{width:64px}h1{font-size:28px;margin:2px 0}.sub{font-size:18px;margin:2px 0 6px}.rules{font-size:15px;margin:6px 0 10px;gap:3px 8px}.field input{font-size:19px;padding:7px 10px}.btn{font-size:18px;padding:9px 18px}.stats{margin:4px 0 8px}.big{font-size:34px}.medal{font-size:34px}.letter p{font-size:19px;margin:6px 0 8px}}
+@media (max-height:690px){#menu .card img,#menu .sub,#menu .small{display:none}#menu .field{margin:2px 0 8px}}
+@media (max-height:460px){#menu .card{display:grid;grid-template-columns:1fr 1fr;column-gap:18px;align-items:center;text-align:left;max-width:720px;padding:10px 16px}#menu h1{grid-column:1/-1;font-size:26px;text-align:center}#menu .how,#menu .field{margin:3px 0}#menu .row{justify-content:flex-start}#menu .btn{font-size:16px;padding:8px 14px}.tab{font-size:16px;padding:4px 9px}.card{max-width:640px}#over .card img,#over .sub{display:none}.stats{grid-template-columns:repeat(4,1fr)}.letter img{display:none}.letter{padding:10px 16px}}
+@media (max-width:360px){.rules{grid-template-columns:1fr}.btn{font-size:18px;padding:10px 16px}.tab{font-size:16px;padding:5px 9px}}
+.card{background:var(--panel);border:4px dashed color-mix(in srgb,var(--chalk) 70%,transparent);border-radius:22px;padding:22px 24px;max-width:430px;width:100%;text-align:center}
+.card img{width:92px;height:auto;transform:rotate(-6deg);filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
+h1{font-family:Bungee,Impact,sans-serif;font-weight:400;font-size:clamp(30px,8vw,44px);line-height:1;margin:6px 0 4px;color:var(--gold);text-shadow:3px 3px 0 var(--pink),6px 6px 0 var(--ink)}
+.sub{font-size:22px;margin:4px 0 12px;line-height:1.2}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;text-align:left;font-size:18px;margin:10px 0 16px;line-height:1.15}
+.rules span b{color:var(--gold);font-weight:400}
+.btn{font-family:Bungee,Impact,sans-serif;font-size:22px;padding:12px 26px;border-radius:16px;border:3px solid var(--ink);background:var(--pink);color:#fff;cursor:pointer;box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.small{font-size:17px;opacity:.85;margin-top:12px}
+.field{display:flex;flex-direction:column;gap:6px;text-align:left;margin:4px 0 14px;font-size:19px}
+.field input{font:inherit;font-size:24px;padding:10px 14px;border-radius:14px;border:3px solid var(--ink);background:var(--chalk);color:var(--ink)}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn.alt{background:var(--gold);color:var(--ink);font-size:18px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0 14px}
+.stats div{border:2px solid color-mix(in srgb,var(--chalk) 35%,transparent);border-radius:12px;padding:6px 8px;font-size:17px}
+.stats b{display:block;font-family:Bungee,Impact,sans-serif;font-weight:400;font-size:22px;color:var(--gold)}
+.medal{font-size:46px;line-height:1}
+.tabs{display:flex;gap:6px;justify-content:center;margin:6px 0 10px}
+.tab{font:inherit;font-size:19px;padding:6px 14px;border-radius:12px;border:2px solid var(--chalk);background:transparent;color:var(--text);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--chalk);color:var(--ink)}
+ol.rank{list-style:none;margin:0 0 14px;padding:0;text-align:left;max-height:46vh;overflow:auto}
+ol.rank li{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:7px 8px;border-bottom:2px dashed color-mix(in srgb,var(--chalk) 25%,transparent);font-size:20px}
+ol.rank li.me{background:color-mix(in srgb,var(--pink) 30%,transparent);border-radius:10px}
+ol.rank .p{font-family:Bungee,Impact,sans-serif;color:var(--gold)} ol.rank .s{font-family:Bungee,Impact,sans-serif} ol.rank small{display:block;opacity:.7;font-size:15px}
+ul.ach{list-style:none;margin:0 0 14px;padding:0;text-align:left;max-height:50vh;overflow:auto;display:grid;gap:6px}
+ul.ach li{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;padding:6px 8px;border-radius:12px;font-size:20px;border:2px solid color-mix(in srgb,var(--chalk) 25%,transparent)}
+ul.ach li.on{background:color-mix(in srgb,var(--gold) 22%,transparent);border-color:var(--gold)} ul.ach li.off{opacity:.6}
+ul.ach .ai{font-size:30px;text-align:center} ul.ach small{display:block;font-size:16px;opacity:.8}
+.letter{background:#1E3A32;border:10px solid #6B4A2E;border-radius:14px;box-shadow:0 12px 0 rgba(0,0,0,.3);color:#F4F1E4;max-width:460px;width:100%;padding:18px 20px;text-align:center}
+.letter img{width:96px;transform:rotate(5deg)} .letter p{font-size:23px;line-height:1.3;margin:10px 0 14px;text-align:left} .letter .sig{text-align:right;color:var(--gold)}
+.letter h1{font-size:30px}
+.how{text-align:left;margin:4px 0 10px;border:2px dashed color-mix(in srgb,var(--chalk) 45%,transparent);border-radius:14px;padding:6px 12px}
+.how summary{cursor:pointer;font-size:20px;color:var(--gold);list-style:none} .how summary::-webkit-details-marker{display:none} .how summary::before{content:"▸ "} .how[open] summary::before{content:"▾ "}
+.how .rules{margin:8px 0 4px}
+.inst[hidden],.inst-offer[hidden]{display:none!important}
+.note{font-size:16px;opacity:.8;margin:0 0 10px}
+.big{font-family:Bungee,Impact,sans-serif;font-size:46px;color:var(--gold);margin:4px 0}
+@media (prefers-reduced-motion:reduce){.card img{transform:none}}
+</style>
+</head>
+<body>
+<div id="wrap">
+<canvas id="c" aria-label="Juego Salva la clase"></canvas>
+<div class="hud"><button class="icon" id="mus" aria-label="Música">🎵</button><button class="icon" id="snd" aria-label="Sonido">🔊</button><button class="icon" id="pau" aria-label="Pausa">⏸</button></div>
+<div class="ov" id="menu"><div class="card">
+<img data-img="rock" alt="Catalina">
+<h1>Salva la clase</h1>
+<p class="sub">La profe Cata vuela por el salón esquivando el papeleo. ¡Feliz cumpleaños!</p>
+<details class="how"><summary>Cómo se juega</summary><div class="rules">
+<span>Toca o pulsa espacio para volar</span><span>Libros y cuadernos quitan vida</span>
+<span><b>+1</b> por cada pila que pasas</span><span><b>+2</b> por cada papel esquivado</span>
+<span>🎸 Púa: <b>+5</b></span><span>☕ Café: recupera vida</span>
+<span>🍎 Manzana: escudo contra un golpe</span><span>Esquiva seguido para subir el combo</span>
+<span>🧲 Imán: atrae las púas</span><span>⏳ Reloj: cámara lenta</span>
+<span style="grid-column:1/-1">⚡ Solo de guitarra: limpia la pantalla, una vez por partida</span>
+<span style="grid-column:1/-1">Cada 150 puntos llega un jefe: el director, la reunión de padres o el cierre de notas. ¡Aguanta hasta que se vaya!</span>
+<span style="grid-column:1/-1">A los 100 puntos hay una sorpresa 🎁</span>
+<span style="grid-column:1/-1">🎸 Guitarra: modo rockstar, 6 s sin daño y puntos dobles</span>
+</div></details>
+<label class="field">¿Quién va a jugar?<input id="name" maxlength="18" autocomplete="nickname" placeholder="Escribe tu nombre"></label>
+<div class="field">Dificultad<div class="tabs" role="radiogroup" aria-label="Dificultad" style="justify-content:flex-start;margin:2px 0"><button class="tab diff" role="radio" data-d="facil">😌 Fácil</button><button class="tab diff" role="radio" data-d="normal">📚 Normal</button><button class="tab diff" role="radio" data-d="rock">🤘 Rockero</button></div><small id="ddesc" style="opacity:.85"></small></div>
+<div class="row"><button class="btn" id="go">Empezar clase</button><button class="btn alt" id="rk1">Ranking</button><button class="btn alt" id="ac1">Logros</button><button class="btn alt inst" id="inst1" hidden>📲 Instalar</button></div>
+<p class="small" id="bestm"></p>
+</div></div>
+<div class="ov" id="over" hidden><div class="card">
+<img data-img="head" alt="Catalina">
+<h1 id="otitle">Fin de la clase</h1>
+<div class="medal" id="omedal">🏅</div>
+<div class="big" id="oscore">0</div>
+<p class="sub" id="omsg"></p>
+<div class="stats"><div>Esquivados<b id="sd">0</b></div><div>Combo máximo<b id="sc">0</b></div><div>Tiempo<b id="st">0 s</b></div><div>Puesto<b id="sp">–</b></div></div>
+<div class="row"><button class="btn" id="again">Jugar otra vez</button><button class="btn alt" id="rk2">Ranking</button><button class="btn alt" id="ac2">Logros</button></div>
+<p class="small inst-offer" id="offer" hidden>¿Te gustó? <button class="btn alt inst" id="inst2" style="font-size:16px;padding:7px 14px">📲 Instálalo en tu celular</button></p>
+<p class="small" id="obest"></p>
+</div></div>
+<div class="ov" id="rank" hidden><div class="card"><h1>Ranking</h1>
+<div class="tabs" role="tablist"><button class="tab" role="tab" id="tg" aria-selected="true">Todos</button><button class="tab" role="tab" id="tl" aria-selected="false">Este dispositivo</button></div>
+<p class="note" id="rnote"></p><ol class="rank" id="rlist"></ol>
+<button class="btn" id="rclose">Volver</button></div></div>
+<div class="ov" id="letter" hidden><div class="letter"><img data-img="her" alt="Tu hermano"><h1>Un mensaje para ti</h1>
+<p>Cata, feliz cumpleaños. Gracias por recibirme en tu casa en Bogotá y por apoyarme tanto cuando más lo necesitaba. Aunque ahora estemos entre Manizales y Bogotá, siempre te siento cerca. Eres la mejor profe y la hermana más rockera. Te quiero mucho.</p>
+<p class="sig">Tu hermano 🤘</p><button class="btn" id="lclose">Seguir jugando</button></div></div>
+<div class="ov" id="achov" hidden><div class="card"><h1>Logros</h1><p class="note" id="anote"></p><ul class="ach" id="alist"></ul><button class="btn" id="aclose">Volver</button></div></div>
+<div class="ov" id="ios" hidden><div class="card"><h1>Instálalo</h1><p class="sub">En iPhone o iPad, desde Safari:</p>
+<ol style="text-align:left;font-size:21px;line-height:1.35;margin:6px 0 14px;padding-left:24px"><li>Toca el botón Compartir <b>⬆️</b> en la barra de Safari.</li><li>Elige <b>Agregar a pantalla de inicio</b>.</li><li>Toca <b>Agregar</b>. El juego aparecerá con su ícono.</li></ol>
+<button class="btn" id="iosclose">Entendido</button></div></div>
+<div class="ov" id="pause" hidden><div class="card"><h1>En pausa</h1><p class="sub">Hasta la profe necesita un recreo.</p><button class="btn" id="resume">Seguir</button></div></div>
+</div>
+<script src="images.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
