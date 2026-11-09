@@ -1,0 +1,69 @@
+name: Publicar Salva la Clase
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Arma la carpeta site/ con el juego y sus íconos. Corre también en cada PR para probar.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar archivos
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generar íconos
+        run: |
+          pip install pillow
+          python tools/icons.py
+
+      - name: Copiar el juego
+        run: cp index.html manifest.webmanifest sw.js images.js game.js site/
+
+      - name: Revisar que no falte nada
+        run: |
+          for f in index.html manifest.webmanifest sw.js images.js game.js \
+                   icons/icon-192.png icons/icon-512.png icons/maskable-512.png \
+                   icons/apple-touch-icon.png icons/favicon.png; do
+            test -s "site/$f" || { echo "Falta site/$f"; exit 1; }
+          done
+          ls -la site site/icons
+
+      - name: Configurar GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Preparar juego
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # Publica solo desde main.
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publicar juego
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,5 +1,5 @@
 // Salva la clase: funciona sin conexión después de la primera visita.
-const CACHE = 'salva-la-clase-v2';
+const CACHE = 'salva-la-clase-v3';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './images.js', './game.js', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
