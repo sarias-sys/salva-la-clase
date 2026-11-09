@@ -20,7 +20,9 @@ El ranking y los logros se guardan en cada dispositivo.
 - `manifest.webmanifest` y `sw.js`: lo hacen instalable y disponible sin conexión.
 - `images.js`: las fotos del juego.
 - `game.js`: la lógica del juego.
-- `tools/icons.py`: genera los íconos de la app al publicar.
-- `.github/workflows/pages.yml`: publica el juego en GitHub Pages automáticamente.
+- `tools/icons.py`: genera los íconos de la app (a partir de la foto en `images.js`) al publicar. Los íconos no se guardan en el repositorio.
+- `.github/workflows/pages.yml`: arma la carpeta `site/` (juego + íconos) y la publica en GitHub Pages cada vez que cambia `main`. En cada PR solo la arma, para comprobar que no falte nada.
+
+Si cambias algún archivo del juego, sube también la versión de `CACHE` en `sw.js` para que los celulares que ya lo tienen instalado reciban la actualización.
 
 Hecho con cariño en DesarrollAndo. ¡Feliz cumpleaños, Cata! 🎂
